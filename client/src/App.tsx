@@ -6,6 +6,7 @@ import ThemeProvider from "./features/shared/components/ThemeProvider";
 import { Toaster } from "./features/shared/components/ui/Toaster";
 import { trpc } from "./lib/utils/trpc";
 import ExperienceList from "./features/experiences/components/ExperienceList";
+import InfiniteScroll from "./features/shared/components/InfiniteScroll";
 
 export function App() {
     const [queryClient] = useState(() => new QueryClient());
@@ -41,7 +42,26 @@ export function App() {
 }
 
 const Index = () => {
-    const query = trpc.experiences.feed.useQuery({});
+    const query = trpc.experiences.feed.useInfiniteQuery(
+        {},
+        {
+            getNextPageParam(lastPage) {
+                return lastPage.nextCursor;
+            },
+        },
+    );
 
-    return <ExperienceList experiences={query.data?.experiences ?? []} isLoading={query.isLoading} />;
+    return (
+        <InfiniteScroll
+            onLoadMore={() => {
+                query.fetchNextPage();
+            }}
+            isFetching={query.isFetchingNextPage}
+        >
+            <ExperienceList
+                experiences={query.data?.pages.flatMap((page) => page.experiences) ?? []}
+                isLoading={query.isLoading || query.isFetchingNextPage}
+            />
+        </InfiniteScroll>
+    );
 };
