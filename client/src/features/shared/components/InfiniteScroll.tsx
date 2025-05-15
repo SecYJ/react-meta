@@ -8,7 +8,7 @@ interface Props {
     threshold?: number;
 }
 
-const InfiniteScroll = ({ onLoadMore, isFetching, children, threshold }: Props) => {
+const InfiniteScroll = ({ onLoadMore, isFetching, children, threshold = 200 }: Props) => {
     const triggerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
